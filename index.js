@@ -1,5 +1,5 @@
 // index.js
-const weatherApi = "https://api.weather.gov/alerts/active?area="
+const weatherApi = "https://api.weather.gov/alerts/active?area=";
 
 const stateInput = document.getElementById("state-input");
 const fetchButton = document.getElementById("fetch-alerts");
@@ -7,25 +7,23 @@ const alertsDisplay = document.getElementById("alerts-display");
 const errorMessage = document.getElementById("error-message");
 
 async function fetchWeatherAlerts(state) {
-    alertsDisplay.resplaceChildren();
-    errorMessage.textContent = "";
-    errorMessage.classList.add("hidden");
+    alertsDisplay.replaceChildren();
 
     try {
         const stateAbbr = state.trim().toUpperCase();
 
         if (!stateAbbr) {
-            throw new Error("Please enter a state abbrevation.");
+            throw new Error("Please enter a state abbreviation, such as CA or NY.");
         }
 
         if (!/^[A-Z]{2}$/.test(stateAbbr)) {
-            throw new Error("Please enter a valid two-letter state abbreviation.");
+            throw new Error("Please enter a valid 2-letter state abbreviation.");
         }
 
-        const response = await fetch(`${weatherApi}${stateAbbr}`);
+        const response = await fetch(`weatherApi{stateAbbr}`);
 
         if (!response.ok) {
-            throw new Error(`API request failed: ${responses.status}`);
+            throw new Error(`Unable to fetch alerts right now (Error ${response.status}). Please try again later.`);
         }
 
         const data = await response.json();
@@ -39,7 +37,7 @@ async function fetchWeatherAlerts(state) {
         errorMessage.textContent = "";
         errorMessage.classList.add("hidden");
 
-    } catch(errorObject) {
+    } catch (errorObject) {
         console.log(errorObject.message);
 
         errorMessage.textContent = errorObject.message;
@@ -55,13 +53,12 @@ function displayAlerts(data) {
     const features = data.features || [];
 
     const summary = document.createElement("h2");
-    summary.textContent = `${data.title || "Weather Alerts"}:
-    ${features.length}`;
+    summary.textContent = `Weather Alerts: ${features.length}`;
     alertsDisplay.appendChild(summary);
 
     if (features.length === 0) {
         const message = document.createElement("p");
-        message.textContent = "There are currently no active weather alerts.";
+        message.textContent = "No active weather alerts found for this area.";
         alertsDisplay.appendChild(message);
         return;
     }
@@ -72,7 +69,7 @@ function displayAlerts(data) {
         const listItem = document.createElement("li");
 
         listItem.textContent =
-        alert.properties?.headline || "Headline unavailable";
+            alert.properties?.headline || "No headline provided for this alert";
 
         alertList.appendChild(listItem);
     });
