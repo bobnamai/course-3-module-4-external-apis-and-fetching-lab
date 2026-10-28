@@ -1,4 +1,91 @@
 // index.js
 const weatherApi = "https://api.weather.gov/alerts/active?area="
 
-// Your code here!
+const stateInput = document.getElementById("state-input");
+const fetchButton = document.getElementById("fetch-alerts");
+const alertsDisplay = document.getElementById("alerts-display");
+const errorMessage = document.getElementById("error-message");
+
+async function fetchWeatherAlerts(state) {
+    alertsDisplay.resplaceChildren();
+    errorMessage.textContent = "";
+    errorMessage.classList.add("hidden");
+
+    try {
+        const stateAbbr = state.trim().toUpperCase();
+
+        if (!stateAbbr) {
+            throw new Error("Please enter a state abbrevation.");
+        }
+
+        if (!/^[A-Z]{2}$/.test(stateAbbr)) {
+            throw new Error("Please enter a valid two-letter state abbreviation.");
+        }
+
+        const response = await fetch(`${weatherApi}${stateAbbr}`);
+
+        if (!response.ok) {
+            throw new Error(`API request failed: ${responses.status}`);
+        }
+
+        const data = await response.json();
+
+        console.log(data);
+
+        displayAlerts(data);
+
+        stateInput.value = "";
+
+        errorMessage.textContent = "";
+        errorMessage.classList.add("hidden");
+
+    } catch(errorObject) {
+        console.log(errorObject.message);
+
+        errorMessage.textContent = errorObject.message;
+        errorMessage.classList.remove("hidden");
+
+        stateInput.value = "";
+    }
+}
+
+function displayAlerts(data) {
+    alertsDisplay.replaceChildren();
+
+    const features = data.features || [];
+
+    const summary = document.createElement("h2");
+    summary.textContent = `${data.title || "Weather Alerts"}:
+    ${features.length}`;
+    alertsDisplay.appendChild(summary);
+
+    if (features.length === 0) {
+        const message = document.createElement("p");
+        message.textContent = "There are currently no active weather alerts.";
+        alertsDisplay.appendChild(message);
+        return;
+    }
+
+    const alertList = document.createElement("ul");
+
+    features.forEach((alert) => {
+        const listItem = document.createElement("li");
+
+        listItem.textContent =
+        alert.properties?.headline || "Headline unavailable";
+
+        alertList.appendChild(listItem);
+    });
+
+    alertsDisplay.appendChild(alertList);
+}
+
+fetchButton.addEventListener("click", () => {
+    fetchWeatherAlerts(stateInput.value);
+});
+
+stateInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        fetchWeatherAlerts(stateInput.value);
+    }
+});
